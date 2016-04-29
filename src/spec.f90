@@ -445,6 +445,7 @@ end if
 !Matsubara expansion of correlation function
 !
 blk = 8 * mats + 1
+clk = blk - 1
 bdim = blk * lmat
 bdim2 = bdim * lmat
 allocate(matr(bdim2, bdim2), STAT=istat)
@@ -471,12 +472,33 @@ do n=1, bdim
   end do
 end do
 !
-do i=1, mats
-
+sua111(1:lmat, 1:lmat) = dcmplx(amsall(1:lmat, 1:lmat, 1, 1), 0.d0)   !c1_up
+sua211(1:lmat, 1:lmat) = dcmplx(amsall(1:lmat, 1:lmat, 1, 1), 0.d0)   !c1_up
+sua121(1:lmat, 1:lmat) = dcmplx(amsall(1:lmat, 1:lmat, 1, 2), 0.d0)   !c1_down
+sua221(1:lmat, 1:lmat) = dcmplx(amsall(1:lmat, 1:lmat, 1, 2), 0.d0)   !c1_down
+!
+sua112 = conjg(transpose(sua111))
+sua122 = conjg(transpose(sua121))
+sua212 = conjg(transpose(sua111))
+sua222 = conjg(transpose(sua121))
+!
+!sua1(1:lmat, 1:lmat) = dcmplx(amsall(1:lmat, 1:lmat, 1, 2), 0.d0)   !c1_down
+!sua3 = conjg(transpose(sua1))
+!sua4 = conjg(transpose(sua2))
+!
+do m=1, clk
+suu(1:lmat, 1:lmat) = sua(1:lmat, 1:lmat, m)
+do n=1, blk
+  big = bdim * (n - 1)
+  do i=1, lmat
+    nud1 = big + i
+    do j=1, lmat
+      nud2 = lmat * j + 1 + big
+      matr(nud1, nud2) = suu(i, j)
+    end do
+  end do
 end do
-
-
-
+!
 
 
 
