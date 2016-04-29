@@ -1,6 +1,7 @@
 module globle 
 implicit none 
 complex*16, save, allocatable :: rho(:)
+complex*16, save, allocatable :: liou(:,:), cont(:,:)
 complex*16, save, allocatable :: cmtmp1(:,:), cmtmp2(:,:), cmtmp3(:,:), cmtmp4(:,:), cmtmp5(:,:), cmtmp6(:,:), cmtmp7(:,:), cmtmp8(:,:)
 complex*16, save, allocatable :: cmtmp9(:,:), cmtmp10(:,:), cmtmp11(:,:), cmtmp12(:,:), cmtmp13(:,:), cmtmp14(:,:), cmtmp15(:,:) 
 real*8, save, allocatable :: dmtmp1(:,:), dmtmp2(:,:), dmtmp3(:,:), dmtmp4(:,:), dmtmp5(:,:)
@@ -24,7 +25,7 @@ end module
 program sp100
 use globle
 implicit none
-integer :: lwork, info, n, m, i
+integer :: lwork, info, n, m, i, j
 integer :: istat
 logical*4 :: exc, energ, dos, varie2
 !complex*16, allocatable :: hs(:,:), w(:), vl(:,:), vr(:,:), work(:), rwork(:)
@@ -443,10 +444,45 @@ end if
 !
 !Matsubara expansion of correlation function
 !
-dimen = 8 * mats
-allocate(rho(dimen), STAT=istat)
+blk = 8 * mats + 1
+bdim = blk * lmat
+bdim2 = bdim * lmat
+allocate(matr(bdim2, bdim2), STAT=istat)
+!allocate(cont(lmat), STAT=istat)
+do n=1, bdim
+  big = lmat * (n - 1)
+  do i=1, lmat
+    do j=1, lmat
+      nud1 = big + i
+      nud2 = big + j
+      matr(nud1, nud2) = hs(i, j)
+    end do
+  end do
+end do
+!
+do n=1, bdim
+  big = lmat * (n - 1) + 1
+  nud1 = big + lmat
+  do i=big, nud1
+    do j=1, lmat
+      nud2 = (j - 1) * bdim + i
+      matr(i, nud2) = matr(i, nud2) - hs(j, i)
+    end do
+  end do
+end do
+!
+do i=1, mats
+
+end do
 
 
+
+
+
+
+
+
+!
 deallocate(cmtmp5, cmtmp6, cmtmp7, cmtmp8, cmtmp1, cmtmp2, cmtmp3, cmtmp4, cmtmp9, cmtmp10, cmtmp11, cmtmp12, cmtmp13, cmtmp14, cmtmp15, STAT = istat)
 deallocate(tmp1, tmp5, tmp2, tmp3, tmp4, tmp, ams, amsall, hs, hss, vl, vr, work, w, rwork, STAT = istat)
 deallocate(dmtmp1, dmtmp2, dmtmp3, dmtmp4, dmtmp5, rw, nu1, nu2, sopr, pauli, ams, amsall, STAT = istat)
