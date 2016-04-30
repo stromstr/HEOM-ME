@@ -444,12 +444,13 @@ end if
 !
 !Matsubara expansion of correlation function
 !
-blk = 8 * mats + 1
+blk = 2 * lmat * mats + 1
+mats2 = mats * 2
 clk = blk - 1
 bdim = blk * lmat
 bdim2 = bdim * lmat
 allocate(matr(bdim2, bdim2), STAT=istat)
-!allocate(cont(lmat), STAT=istat)
+!
 do n=1, bdim
   big = lmat * (n - 1)
   do i=1, lmat
@@ -461,44 +462,68 @@ do n=1, bdim
   end do
 end do
 !
-do n=1, bdim
-  big = lmat * (n - 1) + 1
-  nud1 = big + lmat
-  do i=big, nud1
-    do j=1, lmat
-      nud2 = (j - 1) * bdim + i
-      matr(i, nud2) = matr(i, nud2) - hs(j, i)
+!do n=1, bdim
+!  big = lmat * (n - 1) + 1
+!  nud1 = big + lmat
+!  do i=big, nud1
+!    do j=1, lmat
+!      nud2 = (j - 1) * bdim + i
+!      matr(i, nud2) = matr(i, nud2) - hs(j, i)
+!    end do
+!  end do
+!end do
+!
+do m=1, lmat
+  do n=1, blk
+    big = m * lmat * (n -1)
+    do i=1, lmat
+      nud1 = i + big
+      do j=1, lmat
+        nud2 = (j - 1) * bdim + nud1
+        matr(nud1, nud2) = matr(nud1, mud2) - hs(j, m) 
+      end do
     end do
   end do
-end do
+end do 
 !
-sua111(1:lmat, 1:lmat) = dcmplx(amsall(1:lmat, 1:lmat, 1, 1), 0.d0)   !c1_up
-sua211(1:lmat, 1:lmat) = dcmplx(amsall(1:lmat, 1:lmat, 1, 1), 0.d0)   !c1_up
-sua121(1:lmat, 1:lmat) = dcmplx(amsall(1:lmat, 1:lmat, 1, 2), 0.d0)   !c1_down
-sua221(1:lmat, 1:lmat) = dcmplx(amsall(1:lmat, 1:lmat, 1, 2), 0.d0)   !c1_down
+sua(1:lmat, 1:lmat, 2, 1) = dcmplx(amsall(1:lmat, 1:lmat, 1, 1), 0.d0)   !c1_up
+sua(1:lmat, 1:lmat, 2, 2) = dcmplx(amsall(1:lmat, 1:lmat, 1, 2), 0.d0)   !c1_down
+sua(1:lmat, 1:lmat, 1, 1) = conjg(transpose(sua(1:lmat, 1:lmat, 2, 1)))
+sua(1:lmat, 1:lmat, 1, 2) = conjg(transpose(sua(1:lmat, 1:lmat, 2, 2)))
 !
-sua112 = conjg(transpose(sua111))
-sua122 = conjg(transpose(sua121))
-sua212 = conjg(transpose(sua111))
-sua222 = conjg(transpose(sua121))
+![a^{\sigma}_{\alpha,\mu,\m}, rho] 
 !
-!sua1(1:lmat, 1:lmat) = dcmplx(amsall(1:lmat, 1:lmat, 1, 2), 0.d0)   !c1_down
-!sua3 = conjg(transpose(sua1))
-!sua4 = conjg(transpose(sua2))
-!
-do m=1, clk
-suu(1:lmat, 1:lmat) = sua(1:lmat, 1:lmat, m)
 do n=1, blk
   big = bdim * (n - 1)
-  do i=1, lmat
-    nud1 = big + i
-    do j=1, lmat
-      nud2 = lmat * j + 1 + big
-      matr(nud1, nud2) = suu(i, j)
+  do k=1, mats2
+    big2 = (k - 1) * lmat**2
+    do n=1, 2
+      do m=1, 2
+        big1 = lmat * (m + n - 1)
+        do i=1, lmat
+          nud1 = big + i
+          do j=1, lmat
+            nud2 = big + big1 + big2 + j
+            matr(nud1, nud2) = sua(i, j, n, m)
+          end do
+        end do
+      end do
     end do
   end do
 end do
 !
+do m=1, lmat
+  do n=1, blk
+    big = m * lmat * (n -1)
+    do i=1, lmat
+      nud1 = i + big
+      do j=1, lmat
+        nud2 = (j - 1) * bdim + nud1
+        matr(nud1, nud2) = matr(nud1, mud2) - hs(j, m)
+      end do
+    end do
+  end do
+end do
 
 
 
