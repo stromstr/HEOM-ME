@@ -1,7 +1,12 @@
 module globle 
 implicit none 
-complex*16, save, allocatable :: rho(:)
-complex*16, save, allocatable :: liou(:,:), cont(:,:)
+!
+!
+!
+!
+!
+complex*16, save, allocatable :: matr(:,:)
+complex*16, save, allocatable :: sua(:,:,:,:)
 complex*16, save, allocatable :: cmtmp1(:,:), cmtmp2(:,:), cmtmp3(:,:), cmtmp4(:,:), cmtmp5(:,:), cmtmp6(:,:), cmtmp7(:,:), cmtmp8(:,:)
 complex*16, save, allocatable :: cmtmp9(:,:), cmtmp10(:,:), cmtmp11(:,:), cmtmp12(:,:), cmtmp13(:,:), cmtmp14(:,:), cmtmp15(:,:) 
 real*8, save, allocatable :: dmtmp1(:,:), dmtmp2(:,:), dmtmp3(:,:), dmtmp4(:,:), dmtmp5(:,:)
@@ -21,6 +26,12 @@ real*8, save, allocatable :: amsall(:,:,:,:)
 real*8 :: temp, e1up, e1down, e2up, e2down, e3up, e3down, uu1, uu2, uu3, t12, t13, t23, u12, u13, u23, j12, j23, rho
 integer, save :: dimen, nspin, lwmax, norbs, lmat, mats
 end module
+!
+!
+!
+!
+!
+!
 !
 program sp100
 use globle
@@ -440,99 +451,14 @@ if (dos) then
   end do
 end if
 !
-!priority of index -----> \alpha > \sigma > \mu > m
-!
-!Matsubara expansion of correlation function
-!
-blk = 2 * lmat * mats + 1
-mats2 = mats * 2
-clk = blk - 1
-bdim = blk * lmat
-bdim2 = bdim * lmat
 allocate(matr(bdim2, bdim2), STAT=istat)
+allocate(sua(lmat, lmat, 2, 2), STAT=istat)
+call solve_sd
 !
-do n=1, bdim
-  big = lmat * (n - 1)
-  do i=1, lmat
-    do j=1, lmat
-      nud1 = big + i
-      nud2 = big + j
-      matr(nud1, nud2) = hs(i, j)
-    end do
-  end do
-end do
-!
-!do n=1, bdim
-!  big = lmat * (n - 1) + 1
-!  nud1 = big + lmat
-!  do i=big, nud1
-!    do j=1, lmat
-!      nud2 = (j - 1) * bdim + i
-!      matr(i, nud2) = matr(i, nud2) - hs(j, i)
-!    end do
-!  end do
-!end do
-!
-do m=1, lmat
-  do n=1, blk
-    big = m * lmat * (n -1)
-    do i=1, lmat
-      nud1 = i + big
-      do j=1, lmat
-        nud2 = (j - 1) * bdim + nud1
-        matr(nud1, nud2) = matr(nud1, mud2) - hs(j, m) 
-      end do
-    end do
-  end do
-end do 
-!
-sua(1:lmat, 1:lmat, 2, 1) = dcmplx(amsall(1:lmat, 1:lmat, 1, 1), 0.d0)   !c1_up
-sua(1:lmat, 1:lmat, 2, 2) = dcmplx(amsall(1:lmat, 1:lmat, 1, 2), 0.d0)   !c1_down
-sua(1:lmat, 1:lmat, 1, 1) = conjg(transpose(sua(1:lmat, 1:lmat, 2, 1)))
-sua(1:lmat, 1:lmat, 1, 2) = conjg(transpose(sua(1:lmat, 1:lmat, 2, 2)))
-!
-![a^{\sigma}_{\alpha,\mu,\m}, rho] 
-!
-do n=1, blk
-  big = bdim * (n - 1)
-  do k=1, mats2
-    big2 = (k - 1) * lmat**2
-    do n=1, 2
-      do m=1, 2
-        big1 = lmat * (m + n - 1)
-        do i=1, lmat
-          nud1 = big + i
-          do j=1, lmat
-            nud2 = big + big1 + big2 + j
-            matr(nud1, nud2) = sua(i, j, n, m)
-          end do
-        end do
-      end do
-    end do
-  end do
-end do
-!
-do m=1, lmat
-  do n=1, blk
-    big = m * lmat * (n -1)
-    do i=1, lmat
-      nud1 = i + big
-      do j=1, lmat
-        nud2 = (j - 1) * bdim + nud1
-        matr(nud1, nud2) = matr(nud1, mud2) - hs(j, m)
-      end do
-    end do
-  end do
-end do
-
-
-
-
-
-!
-deallocate(cmtmp5, cmtmp6, cmtmp7, cmtmp8, cmtmp1, cmtmp2, cmtmp3, cmtmp4, cmtmp9, cmtmp10, cmtmp11, cmtmp12, cmtmp13, cmtmp14, cmtmp15, STAT = istat)
-deallocate(tmp1, tmp5, tmp2, tmp3, tmp4, tmp, ams, amsall, hs, hss, vl, vr, work, w, rwork, STAT = istat)
-deallocate(dmtmp1, dmtmp2, dmtmp3, dmtmp4, dmtmp5, rw, nu1, nu2, sopr, pauli, ams, amsall, STAT = istat)
+deallocate(cmtmp5, cmtmp6, cmtmp7, cmtmp8, cmtmp1, cmtmp2, cmtmp3, cmtmp4, cmtmp9, cmtmp10, cmtmp11, cmtmp12, cmtmp13, cmtmp14, cmtmp15, STAT=istat)
+deallocate(tmp1, tmp5, tmp2, tmp3, tmp4, tmp, ams, amsall, hs, hss, vl, vr, work, w, rwork, STAT=istat)
+deallocate(dmtmp1, dmtmp2, dmtmp3, dmtmp4, dmtmp5, rw, nu1, nu2, sopr, pauli, ams, amsall, STAT=istat)
+deallocate(matr, sua, STAT=istat)
 stop
 end
 subroutine cmaxmat(dim1, dim2, cmat, ldm, dmax)
