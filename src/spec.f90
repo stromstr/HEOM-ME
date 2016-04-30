@@ -19,11 +19,13 @@ complex*16, save :: cunity = (1.d0, 0.d0)
 complex*16, save :: eye = (0.d0, 1.d0)
 complex*16, save :: ccompl = (0.d0, 1.d0)
 real*8, save :: hbar = 0.65821
+real*8, save :: pi = 3.1415926
 !real*8, save :: dpico = 1.d-12
 real*8, parameter :: dpico = 1.d-12, dnano = 1.d-9
 real*8, save, allocatable :: tmp(:,:), ams(:,:)
 real*8, save, allocatable :: amsall(:,:,:,:)
 real*8 :: temp, e1up, e1down, e2up, e2down, e3up, e3down, uu1, uu2, uu3, t12, t13, t23, u12, u13, u23, j12, j23, rho
+real*8 :: tl, tr, gl, gr, wl, wr
 integer, save :: dimen, nspin, lwmax, norbs, lmat, mats
 end module
 !
@@ -52,6 +54,12 @@ open(unit=11, file="input")
 open(unit=16, file="test")
 read(11, *) norbs
 read(11, *) mats
+read(11, *) wl
+read(11, *) wr
+read(11, *) gl
+read(11, *) gr
+read(11, *) tl
+read(11, *) tr
 nspin =2
 lwmax = 1000
 lmat = (nspin*2) ** norbs
