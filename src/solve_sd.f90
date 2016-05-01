@@ -5,7 +5,7 @@ integer :: blk, clk, mats2, bidm, bdim2
 integer :: l, k, n, m, i, j
 integer :: big, big1, big2, nud1, nud2
 complex*16, allocatable :: gam(:), ita(:)
-!priority of index -----> \alpha > \sigma > \mu > m
+!priority of index -----> \alpha > m > \sigma > \mu
 !
 !construct system of linear equations in HEOM space
 !
@@ -96,17 +96,34 @@ do i=1, mats
 end do
 !
 do l=1, lmat
-  do k=1, blk
-    do i=1, lmat
-!      do j=1, lmat
-      matr(nud1, nud1) = matr(nud1, nud1) + gam(
-!      end do
+  big = bdim * (l - 1)
+  do k=1, 2
+    big1 = mats * (k - 1) * lmat**2
+    do n=1, mats
+      do i=1, lmat
+        big2 = lmat * (i - 1)
+        do j=1, lmat
+         nud1 = big + big1 + big2 + lmat + j
+         matr(nud1, nud1) = matr(nud1, nud1) + gam(n, k)
+        end do
+      end do
     end do  
   end do
 end do
 !
-
-
+do l=1, lmat
+  big = bdim * (l - 1)
+  do k=1, 2
+    do n=1, mats
+      do i=1, lmat
+        do j=1, lmat
+          matr(nud1, nud2) = matr(nud1, nud2) + ita(n, k) *
+        end do
+      end do
+    end do
+  end do
+end do
+!
 deallocate(gam, ita, STAT=istat)
 !
 !
