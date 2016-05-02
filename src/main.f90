@@ -92,6 +92,7 @@ allocate(dmtmp4(lmat, lmat), STAT=istat)
 allocate(dmtmp5(lmat, lmat), STAT=istat)
 allocate(amsall(lmat, lmat, norbs, nspin), STAT=istat)
 hs = czero
+matr = czero
 heen = czero
 temp = 0.d0
 e1up = 0.d0
@@ -116,11 +117,11 @@ hop1 =0.d0
 rho = 0.d0
 exc = .true.
 dos = .true.
-energ = .true.
+!energ = .true.
 varie2 = .true.
 read(11, *) exc
 read(11, *) dos
-read(11, *) energ
+!read(11, *) energ
 read(11, *) varie2
 read(11, *) temp
 read(11, *) e1up
@@ -141,14 +142,12 @@ read(11, *) u23
 read(11, *) j12
 read(11, *) j23
 !
-!call buildspin
 call buildoperator
 call buildspin
 !
 if (norbs==1) then
-!  call calcams(norbs, nspin, 1, 1, lmat, tmp)
-  cmtmp1(1:lmat, 1:lmat) = dcmplx(amsall(1:lmat, 1:lmat, 1, 1), 0.d0)   !c1_up^dagger
-  cmtmp2(1:lmat, 1:lmat) = dcmplx(amsall(1:lmat, 1:lmat, 1, 2), 0.d0)   !c1_down^dagger
+  cmtmp1(1:lmat, 1:lmat) = dcmplx(amsall(1:lmat, 1:lmat, 1, 1), 0.d0)   !c1_up
+  cmtmp2(1:lmat, 1:lmat) = dcmplx(amsall(1:lmat, 1:lmat, 1, 2), 0.d0)   !c1_down
 !
   call zgemm('c', 'n', lmat, lmat, lmat, cunity, cmtmp1, lmat, cmtmp1, lmat, &
               czero, cmtmp5, lmat)                                     ! n1up
@@ -337,21 +336,21 @@ call zgeev('V','V', lmat, hs, lmat, w, vl, lmat, vr, lmat, work, lwork, rwork, i
 !do n=1, lmat
 !  write(16,*) vr(n, 3)
 !end do
-if (energ) then
-  open(unit=13, file="energylevel.dat")
-  do n=1, lmat
-    write(13,*) real((w(n)))
-  end do
-  do n=1, lmat
-    write(16,*) vr(n,14)
-  end do
-  write(16,*) '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-  call zgemm('c', 'n', lmat, lmat, lmat, cunity, vr, lmat, hss, lmat, czero, cmtmp14, lmat)
-  call zgemm('n', 'n', lmat, lmat, lmat, cunity, cmtmp14, lmat, vr, lmat, czero, cmtmp15, lmat)
-  do n=1, lmat
-    write(16, *) cmtmp15(n,n)
-  end do
-end if
+!if (energ) then
+!  open(unit=13, file="energylevel.dat")
+!  do n=1, lmat
+!    write(13,*) real((w(n)))
+!  end do
+!  do n=1, lmat
+!    write(16,*) vr(n,14)
+!  end do
+!  write(16,*) '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+!  call zgemm('c', 'n', lmat, lmat, lmat, cunity, vr, lmat, hss, lmat, czero, cmtmp14, lmat)
+!  call zgemm('n', 'n', lmat, lmat, lmat, cunity, cmtmp14, lmat, vr, lmat, czero, cmtmp15, lmat)
+!  do n=1, lmat
+!    write(16, *) cmtmp15(n,n)
+!  end do
+!end if
 518 format(3(2x, e18.6e3))
 !
 if (norbs/=1) then

@@ -29,7 +29,7 @@ do m=1, lmat
     do i=1, lmat
       do j=1, lmat
         nud1 = big + big1 + i
-        nud2 = (j - 1) * bdim + nud1
+        nud2 = (j - 1) * bdim + big1 + 1
         matr(nud1, nud2) = matr(nud1, nud2) - hs(j, m)
       end do
     end do
@@ -70,9 +70,9 @@ do l=1, lmat
       do m=1, 2
         big2 = lmat * (n + m - 1)
         do i=1, lmat
-          nud1 = i + big + lmat
+          nud1 = i + big
           do j=1, lmat
-            nud2 = (j - 1) * bdim + big + big1 + big2
+            nud2 = (j - 1) * bdim + big1 + big2 + lmat + 1
             matr(nud1, nud2) = matr(nud1, nud2) - sua(j, l, n, m)
           end do
         end do
@@ -152,11 +152,9 @@ do l=1, lmat
   end do
 end do
 !
-do i=1, bdim2
-  bp(i) = (0.d0, 0.d0)
-end do
+bp = czero
 !
-call dgesv(bdim2, 1, matr, bdim2, bp, bdim2, info)
+call dgesv(bdim2, 1, matr, bdim2, ipiv, bp, bdim2, info)
 if (info .gt. 0) then
   write(10,*) 'The diagonal element of the triangular factor of A,'
   write(10,*) 'so that A is singular; the solution could not be computed.'

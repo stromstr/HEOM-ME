@@ -1,5 +1,5 @@
-2            !norbs(i.e. N dots/levels/orbitals)
-4            !nmats(number of poles in Matsubara expansion)
+1            !norbs(i.e. N dots/levels/orbitals)
+2            !nmats(number of poles in Matsubara expansion)
 5.0          !bandwidth(left)
 5.0          !bandwidth(right)
 0.1          !coupling strength(left)
@@ -7,8 +7,7 @@
 0.1          !temperature of lead(left)
 0.1          !temperature of lead(right)
 F            !whether exciton type(electron-hole interaction, for most situation you do not need it and set as Faulse)
-T            !whether calculate DOS(by default is spin up of spin 1)
-T            !whether print eigenvalues
+F            !whether calculate DOS(by default is spin up of spin 1)
 T            !whether vary with energy level of dot2(For specific purpose of auther, you can just ignore it)
 0.1          !temperature(multiplied by Bolzmann constant Kb)
 -0.5         !e1up

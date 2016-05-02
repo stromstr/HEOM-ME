@@ -10,12 +10,13 @@ TARGET  = hsms
 BIN_TARGET = ${DIR_BIN}/${TARGET}
 
 F77     = ifort
-
+FFLAGS  = -check bounds -traceback -g
+#FFLAGS  = -g
 ${BIN_TARGET} : ${OBJ}
 	${F77} ${LIBS} ${OBJ} -o $@
 
 ${DIR_OBJ}/%.o : ${DIR_SRC}/%.f90
-	${F77} -c $<  -o $@
+	${F77} -c $< ${FFLAGS} -o $@
 
 clean : 
 	rm -f ${BIN_TARGET} ${OBJ} *.mod
