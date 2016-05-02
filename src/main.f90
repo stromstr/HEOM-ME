@@ -5,7 +5,7 @@ implicit none
 !
 !
 !
-complex*16, save, allocatable :: matr(:,:)
+complex*16, save, allocatable :: matr(:,:), bp(:), rho0(:,:)
 complex*16, save, allocatable :: sua(:,:,:,:)
 integer, save :: blk, clk, bdim, mats, mats2, bidm, bdim2
 complex*16, allocatable :: gam(:,:), ita(:,:)
@@ -467,7 +467,7 @@ if (dos) then
   end do
 end if
 !
-allocate(matr(bdim2, bdim2), STAT=istat)
+allocate(matr(bdim2, bdim2), bp(bdim2), rho0(lmat, lmat), STAT=istat)
 allocate(sua(lmat, lmat, 2, 2), STAT=istat)
 allocate(gam(mats, 2), ita(mats, 2), STAT=istat)
 call solve_sd
@@ -475,7 +475,7 @@ call solve_sd
 deallocate(cmtmp5, cmtmp6, cmtmp7, cmtmp8, cmtmp1, cmtmp2, cmtmp3, cmtmp4, cmtmp9, cmtmp10, cmtmp11, cmtmp12, cmtmp13, cmtmp14, cmtmp15, STAT=istat)
 deallocate(tmp1, tmp5, tmp2, tmp3, tmp4, tmp, ams, amsall, hs, hss, vl, vr, work, w, rwork, STAT=istat)
 deallocate(dmtmp1, dmtmp2, dmtmp3, dmtmp4, dmtmp5, rw, nu1, nu2, sopr, pauli, ams, amsall, STAT=istat)
-deallocate(matr, sua, gam, ita, STAT=istat)
+deallocate(matr, rho0, bp, sua, gam, ita, STAT=istat)
 stop
 end
 subroutine cmaxmat(dim1, dim2, cmat, ldm, dmax)

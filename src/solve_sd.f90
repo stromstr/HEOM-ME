@@ -3,6 +3,9 @@ use globle
 implicit none
 integer :: l, k, n, m, i, j, q
 integer :: big, big1, big2, big3, big4, nud1, nud2
+integer :: ipiv(bdim2)
+integer :: info
+real*8 :: do1
 !priority of index -----> \alpha > m > \sigma > \mu
 !
 !construct system of linear equations in HEOM space
@@ -149,7 +152,28 @@ do l=1, lmat
   end do
 end do
 !
+do i=1, bdim2
+  bp(i) = (0.d0, 0.d0)
+end do
 !
+call dgesv(bdim2, 1, matr, bdim2, bp, bdim2, info)
+if (info .gt. 0) then
+  write(10,*) 'The diagonal element of the triangular factor of A,'
+  write(10,*) 'so that A is singular; the solution could not be computed.'
+  stop
+end if
+!
+do l=1, lmat
+  big = (l - 1) * bdim
+  do j=1, lmat 
+    nud2 = big + j
+    rho0(j, l) = bp(nud2)
+  end do
+end do  
+!
+call calcoccup(rho0, do1)
+write(17, *) 'for open system'
+write(17, '(e15.6e3)') do1
 !
 end subroutine
 
