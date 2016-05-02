@@ -1,21 +1,12 @@
 subroutine solve_sd
 use globle
 implicit none
-integer :: blk, clk, mats2, bidm, bdim2
-integer :: l, k, n, m, i, j, q, r
+integer :: l, k, n, m, i, j, q
 integer :: big, big1, big2, big3, big4, nud1, nud2
-complex*16, allocatable :: gam(:), ita(:)
 !priority of index -----> \alpha > m > \sigma > \mu
 !
 !construct system of linear equations in HEOM space
 !
-blk = 2 * lmat * mats + 1
-mats2 = mats * 2
-clk = blk - 1
-bdim = blk * lmat
-bdim2 = bdim * lmat
-!allocate(matr(bdim2, bdim2), STAT=istat)
-!allocate(sua(lmat, lmat, 2, 2), STAT=istat)
 !
 do n=1, bdim
   big = lmat * (n - 1)
@@ -29,13 +20,14 @@ do n=1, bdim
 end do
 !
 do m=1, lmat
+  big = (m - 1) * bdim
   do n=1, blk
-    big = m * lmat * (n -1)
+    big1 = (n - 1) * lmat
     do i=1, lmat
-      nud1 = i + big
       do j=1, lmat
+        nud1 = big + big1 + i
         nud2 = (j - 1) * bdim + nud1
-        matr(nud1, nud2) = matr(nud1, mud2) - hs(j, m)
+        matr(nud1, nud2) = matr(nud1, nud2) - hs(j, m)
       end do
     end do
   end do
@@ -78,7 +70,7 @@ do l=1, lmat
           nud1 = i + big + lmat
           do j=1, lmat
             nud2 = (j - 1) * bdim + big + big1 + big2
-            matr(nud1, nud2) = matr(nud1, mud2) - sua(j, l, n, m)
+            matr(nud1, nud2) = matr(nud1, nud2) - sua(j, l, n, m)
           end do
         end do
       end do
@@ -87,7 +79,6 @@ do l=1, lmat
 end do
 !
 !Matsubara expansion of correlation function
-allocate(gam(mats, 2), ita(mats, 2), STAT=istat)
 do i=1, mats
   gam(i, 1) = (2 * i - 1) * pi / tl
   gam(i, 2) = (2 * i - 1) * pi / tr
@@ -157,7 +148,7 @@ do l=1, lmat
     end do
   end do
 end do
-deallocate(gam, ita, STAT=istat)
+!
 !
 !
 end subroutine
