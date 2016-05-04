@@ -1,10 +1,12 @@
 subroutine solve_sd
 use globle
 implicit none
+integer, parameter :: llwmax = 1000
+double precision :: s(bdim2), rrwork(5*bdim2)
 integer :: l, k, n, m, i, j, q
 integer :: big, big1, big2, big3, big4, nud1, nud2
-integer :: ipiv(bdim2)
-integer :: info
+complex*16 :: u(bdim2, bdim2), vt(bdim2, bdim2), wwork(llwmax)
+integer :: info, lwork
 real*8 :: do1
 !priority of index -----> \alpha > m > \sigma > \mu
 !
@@ -152,28 +154,77 @@ do l=1, lmat
   end do
 end do
 !
-bp = czero
+! query the optimal workspace
 !
-call dgesv(bdim2, 1, matr, bdim2, ipiv, bp, bdim2, info)
-if (info .gt. 0) then
-  write(10,*) 'The diagonal element of the triangular factor of A,'
-  write(10,*) 'so that A is singular; the solution could not be computed.'
+lwork = -1
+call zgesvd('all', 'all', bdim2, bdim2, matr, bdim2, s, u, bdim2, vt, bdim2, wwork, lwork, rrwork, info)
+!
+! check for convergence
+! 
+if(info .gt. 0 ) then
+  write(10,*)'The algorithm computing SVD failed to converge.'
   stop
 end if
 !
-do l=1, lmat
-  big = (l - 1) * bdim
-  do j=1, lmat 
-    nud2 = big + j
-    rho0(j, l) = bp(nud2)
-  end do
-end do  
+! print singular values
 !
-call calcoccup(rho0, do1)
-write(17, *) 'for open system'
-write(17, '(e15.6e3)') do1
+call print_rmatrix('Singular values', 1, bdim2, s, 1)
+!
+! print left singular vactors
+!
+call print_matrix('Left singular vectors(stored columnwise)', bdim2, bdim2, u, bdim2)
+!
+!
+!do l=1, lmat
+!  big = (l - 1) * bdim
+!  do j=1, lmat 
+!    nud2 = big + j
+!    rho0(j, l) = bp(nud2)
+!  end do
+!end do  
+!
+!call calcoccup(rho0, do1)
+!write(17, *) 'for open system'
+!write(17, '(e15.6e3)') do1
 !
 end subroutine
+!
+!
+!
+!
+!
+!
+!  Auxiliary routine: printing a matrix.
+subroutine print_matrix( DESC, m, n, a, lda )
+character*(*)    DESC
+integer        m, n, lda
+complex*16       a( lda, * )
+integer          i, j
+write(10,*)
+write(10,*) DESC
+do i = 1, m
+  write(10,9998) ( a(i, j), j = 1, n )
+end do
+!
+9998 format( 11(:,1X,'(',F6.2,',',F6.2,')') )
+return
+end
+!
+! Auxiliary routine: printing a real matrix.
+!
+subroutine print_rmatrix( DESC, M, N, A, LDA )
+CHARACTER*(*)    DESC
+INTEGER          M, N, LDA
+DOUBLE PRECISION A( LDA, * )
+INTEGER          I, J
+WRITE(10,*)
+WRITE(10,*) DESC
+DO I = 1, M
+  WRITE(10,9998) ( A( I, J ), J = 1, N )
+END DO
+9998 FORMAT( 11(:,1X,F6.2) )
+RETURN
+end
 
 
 
