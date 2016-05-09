@@ -8,6 +8,7 @@ integer :: big, big1, big2, big3, big4, nud1, nud2
 complex*16 :: u(bdim2, bdim2), vt(bdim2, bdim2), wwork(llwmax)
 integer :: info, lwork
 real*8 :: do1
+open(unit=1132, file="temp")
 !priority of index -----> \alpha > m > \sigma > \mu
 !
 !construct system of linear equations in HEOM space
@@ -156,9 +157,23 @@ end do
 !
 ! query the optimal workspace
 !
+do i=1, mats
+  write(1132, *) gam(i, 1)
+  write(1132, *) ita(i, 1)
+end do
+!
+write(1132, *) '*******************'
+do i=1, bdim2
+  do j=1, bdim2
+    write(1132, *) matr(i, j)
+  end do
+end do
+! Query the optimal workspace
 lwork = -1
 call zgesvd('all', 'all', bdim2, bdim2, matr, bdim2, s, u, bdim2, vt, bdim2, wwork, lwork, rrwork, info)
-!
+lwork = min(llwmax, int(wwork(1)))
+! Compute SVD
+call zgesvd('all', 'all', bdim2, bdim2, matr, bdim2, s, u, bdim2, vt, bdim2, wwork, lwork, rrwork, info)
 ! check for convergence
 ! 
 if(info .gt. 0 ) then
@@ -213,17 +228,17 @@ end
 ! Auxiliary routine: printing a real matrix.
 !
 subroutine print_rmatrix( DESC, M, N, A, LDA )
-CHARACTER*(*)    DESC
-INTEGER          M, N, LDA
-DOUBLE PRECISION A( LDA, * )
-INTEGER          I, J
-WRITE(10,*)
-WRITE(10,*) DESC
-DO I = 1, M
-  WRITE(10,9998) ( A( I, J ), J = 1, N )
-END DO
-9998 FORMAT( 11(:,1X,F6.2) )
-RETURN
+character*(*)    DESC
+integer          M, N, LDA
+double precision A( LDA, * )
+integer          I, J
+write(10,*)
+write(10,*) DESC
+do I = 1, M
+  write(10,9998) ( A( I, J ), J = 1, N )
+end do
+9998 format( 11(:,1X,F6.2) )
+return
 end
 
 
