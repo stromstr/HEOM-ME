@@ -53,6 +53,7 @@ real*8 :: hop1
 open(unit=10, file="log")
 open(unit=11, file="input")
 open(unit=16, file="test")
+open(unit=113, file="temp")
 read(11, *) norbs
 read(11, *) mats
 read(11, *) wl

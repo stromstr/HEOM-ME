@@ -1,14 +1,15 @@
 subroutine solve_sd
 use globle
 implicit none
-integer, parameter :: llwmax = 10000
-double precision :: s(bdim2), rrwork(5*bdim2)
+integer, parameter :: llwmax = 100000
+double precision :: s(bdim2), rrwork(10*bdim2)
+!rrwork dimension should be at least max( 1, 5*min(bdim2, bdim2)) 
 integer :: l, k, n, m, i, j, q
 integer :: big, big1, big2, big3, big4, nud1, nud2
 complex*16 :: u(bdim2, bdim2), vt(bdim2, bdim2), wwork(llwmax)
 integer :: info, lwork
 complex*16 :: do1
-open(unit=1132, file="temp")
+!open(unit=113, file="temp")
 !priority of index -----> \alpha > m > \sigma > \mu
 !
 !construct system of linear equations in HEOM space
@@ -158,14 +159,14 @@ end do
 ! query the optimal workspace
 !
 do i=1, mats
-  write(1132, *) gam(i, 1)
-  write(1132, *) ita(i, 1)
+  write(113, *) gam(i, 1)
+  write(113, *) ita(i, 1)
 end do
 !
-write(1132, *) '*******************'
+write(113, *) '*******************'
 do i=1, bdim2
   do j=1, bdim2
-    write(1132, *) matr(i, j)
+    write(113, *) matr(i, j)
   end do
 end do
 ! Query the optimal workspace
@@ -196,6 +197,7 @@ do while(s(i) .lt. 0.1)
   m = i
 end do
 !
+do m=1, bdim2
 do l=1, lmat
   big = (l - 1) * bdim
   do j=1, lmat 
@@ -212,9 +214,10 @@ call zgemm('c', 'n', lmat, lmat, lmat, cunity, cmtmp2, lmat, cmtmp2, lmat, &
            czero, cmtmp6, lmat)                                     ! n1down
 cmtmp1 = cmtmp5 + cmtmp6
 call calcoccup2(cmtmp1, rho0, do1)
-write(17, *) 'for open system'
+!write(17, *) 'for open system'
 !write(17, '(A4, I1, 3x, e15.6e3)') 'orbs', 1, do1
 write(17, *) do1
+end do
 end subroutine
 !
 !
