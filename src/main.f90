@@ -384,7 +384,7 @@ if (norbs==1) then
 !    end do
 !  end do
   call calcoccup(cmtmp1, hop1)
-  write(17, '(A4, I1, 3x, f12.6, 3x, e15.6e3)') 'orbs', 1, e1up, hop1
+  write(17, '(A4, I1, 3x, e15.6e3)') 'orbs', 1, hop1
   hop1 = 0.d0
 else if (norbs==2) then
   cmtmp1(1:lmat, 1:lmat) = dcmplx(amsall(1:lmat, 1:lmat, 1, 1), 0.d0)   !c1_up

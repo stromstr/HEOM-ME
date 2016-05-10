@@ -6,8 +6,8 @@ complex*16 :: occtmp(lmat, lmat)
 complex*16 :: cc1, cc2
 real*8  :: occout
 integer :: n, m
-cc1 = (0.d0, 0.d0)
-cc2 = (0.d0, 0.d0)
+cc1 = czero
+cc2 = czero
 !write(16,*) '~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 !do n=1, lmat
 !  do m=1, lmat
