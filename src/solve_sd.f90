@@ -4,7 +4,7 @@ implicit none
 integer, parameter :: llwmax = 100000
 double precision :: s(bdim2), rrwork(10*bdim2)
 !rrwork dimension should be at least max( 1, 5*min(bdim2, bdim2)) 
-integer :: l, k, n, m, i, j, q
+integer :: l, k, n, m, i, j, q, rev
 integer :: big, big1, big2, big3, big4, nud1, nud2
 complex*16 :: u(bdim2, bdim2), vt(bdim2, bdim2), wwork(llwmax)
 integer :: info, lwork
@@ -14,7 +14,7 @@ complex*16 :: do1
 !
 !construct system of linear equations in HEOM space
 !
-!
+! confirmed!
 do n=1, bdim
   big = lmat * (n - 1)
   do i=1, lmat
@@ -25,15 +25,16 @@ do n=1, bdim
     end do
   end do
 end do
-!
+! confirmed!
 do m=1, lmat
   big = (m - 1) * bdim
   do n=1, blk
     big1 = (n - 1) * lmat
     do i=1, lmat
       do j=1, lmat
+        big2 = (j - 1) * bdim
         nud1 = big + big1 + i
-        nud2 = (j - 1) * bdim + big1 + 1
+        nud2 = big1 + big2 + 1
         matr(nud1, nud2) = matr(nud1, nud2) - hs(j, m)
       end do
     end do
@@ -46,26 +47,31 @@ sua(1:lmat, 1:lmat, 1, 1) = conjg(transpose(sua(1:lmat, 1:lmat, 2, 1)))  !c1_{up
 sua(1:lmat, 1:lmat, 1, 2) = conjg(transpose(sua(1:lmat, 1:lmat, 2, 2)))  !c1_{down}^{dagger}
 !
 ![a^{\sigma}_{\alpha,\mu,\m}, rho] 
-!
+! confirmed!
 do l=1, lmat
   big = bdim * (l - 1)
   do k=1, mats2
     big1 = (k - 1) * lmat**2
     do n=1, 2
+      if (n .eq. 1) then
+        rev = 2
+      else if (n .eq. 2) then
+        rev = 1
+      end if
       do m=1, 2
         big2 = lmat * (m + n -1)
         do i=1, lmat
-          nud1 = big + i + lmat
+          nud1 = big + i
           do j=1, lmat
             nud2 = big + big1 + big2 + j
-            matr(nud1, nud2) = sua(i, j, n, m)
+            matr(nud1, nud2) = matr(nud1, nud2) + sua(i, j, rev, m)
           end do
         end do
       end do
     end do
   end do
 end do
-!
+! confirmed!
 do l=1, lmat
   big = bdim * (l - 1)
   do k=1, mats2
@@ -76,7 +82,8 @@ do l=1, lmat
         do i=1, lmat
           nud1 = i + big
           do j=1, lmat
-            nud2 = (j - 1) * bdim + big1 + big2 + lmat + 1
+            big3 = (j - 1) * bdim 
+            nud2 = big1 + big2 + big2 + lmat + i
             matr(nud1, nud2) = matr(nud1, nud2) - sua(j, l, n, m)
           end do
         end do
@@ -92,7 +99,7 @@ do i=1, mats
   ita(i, 1) = - eye * 2 / (tl * pi) * gl * wl**2 / (gam(i, 1)**2 + wl**2)
   ita(i, 2) = - eye * 2 / (tr * pi) * gr * wr**2 / (gam(i, 2)**2 + wr**2)
 end do
-!
+! confirmed!
 do l=1, lmat
   big = bdim * (l - 1)
   do k=1, 2
@@ -103,7 +110,7 @@ do l=1, lmat
         big2 = lmat * (i - 1)
         do j=1, lmat
           nud1 = big + big1 + big2 + lmat + j
-          matr(nud1, nud1) = matr(nud1, nud1) + gam(n, k)
+          matr(nud1, nud1) = matr(nud1, nud1) - eye * gam(n, k)
         end do
       end do
     end do  
@@ -132,7 +139,7 @@ do l=1, lmat
     end do
   end do
 end do
-!
+! has bug!
 do l=1, lmat
   big = (l - 1) * bdim
   do k=1, 2
