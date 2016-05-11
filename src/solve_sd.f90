@@ -5,7 +5,7 @@ integer, parameter :: llwmax = 100000
 double precision :: s(bdim2), rrwork(10*bdim2)
 !rrwork dimension should be at least max( 1, 5*min(bdim2, bdim2)) 
 integer :: l, k, n, m, i, j, q, rev
-integer :: big, big1, big2, big3, big4, nud1, nud2
+integer :: big, big1, big2, big3, big4, big5, nud1, nud2
 complex*16 :: u(bdim2, bdim2), vt(bdim2, bdim2), wwork(llwmax)
 integer :: info, lwork
 complex*16 :: do1
@@ -18,8 +18,8 @@ complex*16 :: do1
 do n=1, bdim
   big = lmat * (n - 1)
   do i=1, lmat
+    nud1 = big + i
     do j=1, lmat
-      nud1 = big + i
       nud2 = big + j
       matr(nud1, nud2) = hs(i, j)
     end do
@@ -31,10 +31,10 @@ do m=1, lmat
   do n=1, blk
     big1 = (n - 1) * lmat
     do i=1, lmat
+      nud1 = big + big1 + i
       do j=1, lmat
         big2 = (j - 1) * bdim
-        nud1 = big + big1 + i
-        nud2 = big1 + big2 + 1
+        nud2 = big1 + big2 + i
         matr(nud1, nud2) = matr(nud1, nud2) - hs(j, m)
       end do
     end do
@@ -47,7 +47,7 @@ sua(1:lmat, 1:lmat, 1, 1) = conjg(transpose(sua(1:lmat, 1:lmat, 2, 1)))  !c1_{up
 sua(1:lmat, 1:lmat, 1, 2) = conjg(transpose(sua(1:lmat, 1:lmat, 2, 2)))  !c1_{down}^{dagger}
 !
 ![a^{\sigma}_{\alpha,\mu,\m}, rho] 
-! confirmed!
+! has bug!
 do l=1, lmat
   big = bdim * (l - 1)
   do k=1, mats2
@@ -59,11 +59,11 @@ do l=1, lmat
         rev = 1
       end if
       do m=1, 2
-        big2 = lmat * (m + n -1)
+        big2 = lmat * (m + n - 1)
         do i=1, lmat
           nud1 = big + i
           do j=1, lmat
-            nud2 = big + big1 + big2 + j
+            nud2 = big + big1 + big2 + j + lmat * l
             matr(nud1, nud2) = matr(nud1, nud2) + sua(i, j, rev, m)
           end do
         end do
@@ -71,20 +71,26 @@ do l=1, lmat
     end do
   end do
 end do
-! confirmed!
+!so far checked, 2016-5-11
+!
 do l=1, lmat
   big = bdim * (l - 1)
   do k=1, mats2
     big1 = (k - 1) * lmat**2
     do n=1, 2
+      if (n .eq. 1) then
+        rev = 2
+      else if (n .eq. 2) then
+        rev = 1
+      end if
       do m=1, 2
         big2 = lmat * (n + m - 1)
         do i=1, lmat
           nud1 = i + big
           do j=1, lmat
             big3 = (j - 1) * bdim 
-            nud2 = big1 + big2 + big2 + lmat + i
-            matr(nud1, nud2) = matr(nud1, nud2) - sua(j, l, n, m)
+            nud2 = big1 + big2 + big3 + lmat * l + i
+            matr(nud1, nud2) = matr(nud1, nud2) - sua(j, l, rev, m)
           end do
         end do
       end do
@@ -116,7 +122,7 @@ do l=1, lmat
     end do  
   end do
 end do
-!
+! confirmed!
 do l=1, lmat
   big = bdim * (l - 1)
   do k=1, 2
@@ -128,8 +134,8 @@ do l=1, lmat
         do q=1, 2
           big4 = (q - 1) * lmat
           do i=1, lmat
+            nud1 = big + big1 + big2 + big3 + big4 + lmat * l + i
             do j=1, lmat
-              nud1 = big + big1 + big2 + big3 + big4 + lmat + i
               nud2 = j
               matr(nud1, nud2) = matr(nud1, nud2) + ita(n, k) * sua(i, j, q, m)
             end do
@@ -140,21 +146,46 @@ do l=1, lmat
   end do
 end do
 ! has bug!
+!do l=1, lmat
+!  big = (l - 1) * bdim
+!  do k=1, 2
+!    big1 = mats * (k - 1) * lmat**2
+!    do n=1, mats
+!      big2 = (n - 1) * lmat**2
+!      do m=1, 2
+!        big3 = (m - 1) * lmat * 2
+!        do q=1, 2
+!          big4 = (q - 1) * lmat
+!          do i=1, lmat
+!            do j=1, lmat 
+!              big5 = (j - 1) * bdim
+!              nud1 = big + big1 + big2 + big3 + big4 + lmat + i
+!              nud2 = big5 + lmat
+!              matr(nud1, nud2) = matr(nud1, nud2) - ita(n, k) * sua(j, i, q, m)
+!            end do
+!          end do
+!        end do
+!      end do
+!    end do
+!  end do
+!end do
+!
 do l=1, lmat
   big = (l - 1) * bdim
   do k=1, 2
     big1 = mats * (k - 1) * lmat**2
     do n=1, mats
-      big2 = (n - 1) * lmat**2
+      big2 = (n - 1) * lmat ** 2
       do m=1, 2
         big3 = (m - 1) * lmat * 2
         do q=1, 2
           big4 = (q - 1) * lmat
           do i=1, lmat
+            nud1 = big + big1 + big2 + big3 + big4 + lmat * l + i
             do j=1, lmat
-              nud1 = big + i 
-              nud2 = big + big1 + big2 + big3 + big4 + lmat + j
-              matr(nud1, nud2) = matr(nud1, nud2) - ita(n, k) * sua(j, i, q, m)
+              big5 = (j - 1) * lmat
+              nud2 = big5 + i
+              matr(nud1, nud2) = matr(nud1, nud2) - ita(n, k) * sua(j, l, q, m)
             end do
           end do
         end do
@@ -162,7 +193,6 @@ do l=1, lmat
     end do
   end do
 end do
-!
 ! query the optimal workspace
 !
 do i=1, mats
