@@ -154,31 +154,7 @@ do l=1, lmat
     end do
   end do
 end do
-! has bug!
-!do l=1, lmat
-!  big = (l - 1) * bdim
-!  do k=1, 2
-!    big1 = mats * (k - 1) * lmat**2
-!    do n=1, mats
-!      big2 = (n - 1) * lmat**2
-!      do m=1, 2
-!        big3 = (m - 1) * lmat * 2
-!        do q=1, 2
-!          big4 = (q - 1) * lmat
-!          do i=1, lmat
-!            do j=1, lmat 
-!              big5 = (j - 1) * bdim
-!              nud1 = big + big1 + big2 + big3 + big4 + lmat + i
-!              nud2 = big5 + lmat
-!              matr(nud1, nud2) = matr(nud1, nud2) - ita(n, k) * sua(j, i, q, m)
-!            end do
-!          end do
-!        end do
-!      end do
-!    end do
-!  end do
-!end do
-! could be bug
+! confirmed!
 do l=1, lmat
   big = (l - 1) * bdim
   do k=1, 2
