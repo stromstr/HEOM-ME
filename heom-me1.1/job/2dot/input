@@ -1,0 +1,10 @@
+2            !norbs (i.e. N dots/levels/orbitals)
+F            !whether exciton type (electron-hole interaction, for most cases you do not need it and set as Faulse)
+F            !whether print eigenvalues
+T            !whether vary with energy level of dot2 (For specific purpose of auther, you can just ignore it)
+0.03          !temperature (multiplied by Bolzmann constant Kb)
+
+$hamil  e1up=.9998  e1down=.9998  e2up=-3.0001  e2down=-3.0001  e3up=-2.0  e3down=-2.0
+    uu1=2.0  uu2=2.0  uu3=2.0  u12=0.0   t12=0.04  t23=.9002  t13=0.0  j12=0.0  j23=0.0  $end
+
+$ldos dos=F idos=1        $end  ! dos > whether calculate density of spectral, idos > for the dot i, spin up is default
